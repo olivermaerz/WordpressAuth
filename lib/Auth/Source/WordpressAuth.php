@@ -1,5 +1,5 @@
 <?php
-class sspmod_wordpress_Auth_Source_WordpressAuth   extends sspmod_core_Auth_UserPassBase {
+class sspmod_wordpressauth_Auth_Source_WordpressAuth   extends sspmod_core_Auth_UserPassBase {
 
     /* The database DSN */
     private $dsn;
@@ -28,11 +28,10 @@ class sspmod_wordpress_Auth_Source_WordpressAuth   extends sspmod_core_Auth_User
         $this->password = $config['password'];
 
         if (!is_string($config['userstable'])) {
-            // no table name in config - use the default
-            $this->userstable = 'wp_users';
+            throw new Exception('Missing or invalid userstable option in config.');
         } else {
             // custom table name is configured
-            $this->userstable = $config['password'];
+            $this->userstable = $config['userstable'];
         }
     }
 
@@ -50,28 +49,26 @@ class sspmod_wordpress_Auth_Source_WordpressAuth   extends sspmod_core_Auth_User
          * the username in the database query.
          */
         //$st = $db->prepare('SELECT username, password_hash, full_name FROM userdb WHERE username=:username');
-
-        $userstable = mysql_real_escape_string($this->userstable);
-
-        $st = $db->prepare('SELECT user_login, user_pass, display_name, user_email FROM ' .  $userstable . ' WHERE user_login = :username');
+        $st = $db->prepare('SELECT user_login, user_pass, display_name, user_email FROM '.$this->userstable.' WHERE user_login = :username');
 
         if (!$st->execute(array('username' => $username))) {
-            throw new Exception('Failed to query database for user.');
+            throw new Exception("Failed to query database for user.");
         }
 
         /* Retrieve the row from the database. */
         $row = $st->fetch(PDO::FETCH_ASSOC);
         if (!$row) {
             /* User not found. */
-            SimpleSAML\Logger::warning('WordpressAuth: Could not find user ' . var_export($username, TRUE) . '.');
+            //SimpleSAML\Logger::warning('WordpressAuth: Could not find user ' . var_export($username, TRUE) . '.');
             throw new SimpleSAML_Error_Error('WRONGUSERPASS');
         }
 
         /* Check the password against Wordpress wp_users tables */
 
-        $hasher = new PasswordHash(8, TRUE);
+        //$hasher = new PasswordHash(8, TRUE);
 
-        if (!$hasher->CheckPassword($password, $row['user_pass']){
+        //if (!$hasher->CheckPassword($password, $row['user_pass'])){
+        if(password_verify($password, $row['user_pass'])){
             /* Invalid password. */
             SimpleSAML\Logger::warning('WordpressAuth: Wrong password for user ' . var_export($username, TRUE) . '.');
             throw new SimpleSAML_Error_Error('WRONGUSERPASS');
