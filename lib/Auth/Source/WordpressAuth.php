@@ -59,7 +59,6 @@ class sspmod_wordpressauth_Auth_Source_WordpressAuth   extends sspmod_core_Auth_
         $row = $st->fetch(PDO::FETCH_ASSOC);
         if (!$row) {
             /* User not found. */
-            //SimpleSAML\Logger::warning('WordpressAuth: Could not find user ' . var_export($username, TRUE) . '.');
             throw new SimpleSAML_Error_Error('WRONGUSERPASS');
         }
 
@@ -68,7 +67,7 @@ class sspmod_wordpressauth_Auth_Source_WordpressAuth   extends sspmod_core_Auth_
         //$hasher = new PasswordHash(8, TRUE);
 
         //if (!$hasher->CheckPassword($password, $row['user_pass'])){
-        if(password_verify($password, $row['user_pass'])){
+        if(!password_verify($password, $row['user_pass'])){
             /* Invalid password. */
             SimpleSAML\Logger::warning('WordpressAuth: Wrong password for user ' . var_export($username, TRUE) . '.');
             throw new SimpleSAML_Error_Error('WRONGUSERPASS');
