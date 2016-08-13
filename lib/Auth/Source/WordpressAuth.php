@@ -75,6 +75,8 @@ class sspmod_wordpressauth_Auth_Source_WordpressAuth   extends sspmod_core_Auth_
         /* Create the attribute array of the user. */
         $attributes = array(
             'uid' => array($username),
+            'username' => array($username),
+            'name' => array($row['display_name']), 
             'displayName' => array($row['display_name']),
             'email' => array($row['user_email']),
             'eduPersonAffiliation' => array('member', 'employee'),
