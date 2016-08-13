@@ -2,7 +2,7 @@
 
 Module to use SimpleSAMLphp with a MySQL user database.
 
-(PHP 5 >= 5.5.0, PHP 7)
+(PHP 5 >= 5.3, PHP 7)
 
 Add to your /config/authsources.php :
 
