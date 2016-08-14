@@ -1,5 +1,5 @@
 <?php
-class sspmod_wordpressauth_Auth_Source_WordpressAuth   extends sspmod_core_Auth_UserPassBase {
+class sspmod_wordpressauth_Auth_Source_WordpressAuth extends sspmod_core_Auth_UserPassBase {
 
     /* The database DSN */
     private $dsn;
@@ -14,6 +14,7 @@ class sspmod_wordpressauth_Auth_Source_WordpressAuth   extends sspmod_core_Auth_
     public function __construct($info, $config) {
         parent::__construct($info, $config);
 
+        /* Load DSN, username, password and userstable from configuration */
         if (!is_string($config['dsn'])) {
             throw new Exception('Missing or invalid dsn option in config.');
         }
@@ -26,13 +27,10 @@ class sspmod_wordpressauth_Auth_Source_WordpressAuth   extends sspmod_core_Auth_
             throw new Exception('Missing or invalid password option in config.');
         }
         $this->password = $config['password'];
-
         if (!is_string($config['userstable'])) {
             throw new Exception('Missing or invalid userstable option in config.');
-        } else {
-            // custom table name is configured
-            $this->userstable = $config['userstable'];
         }
+        $this->userstable = $config['userstable'];
     }
 
     protected function login($username, $password) {
@@ -40,15 +38,10 @@ class sspmod_wordpressauth_Auth_Source_WordpressAuth   extends sspmod_core_Auth_
         $db = new PDO($this->dsn, $this->username, $this->password);
         $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        /* Ensure that we are operating with UTF-8 encoding.
-         * This command is for MySQL. Other databases may need different commands.
-         */
+        /* Ensure that we are operating with UTF-8 encoding. */
         $db->exec("SET NAMES 'utf8'");
 
-        /* With PDO we use prepared statements. This saves us from having to escape
-         * the username in the database query.
-         */
-        //$st = $db->prepare('SELECT username, password_hash, full_name FROM userdb WHERE username=:username');
+        /* Prepare statement (PDO) */
         $st = $db->prepare('SELECT user_login, user_pass, display_name, user_email FROM '.$this->userstable.' WHERE user_login = :username');
 
         if (!$st->execute(array('username' => $username))) {
@@ -62,12 +55,12 @@ class sspmod_wordpressauth_Auth_Source_WordpressAuth   extends sspmod_core_Auth_
             throw new SimpleSAML_Error_Error('WRONGUSERPASS');
         }
 
-        /* Check the password against Wordpress wp_users tables */
+        /* Load the Portable PHP password hashing framework */
         require_once( dirname(__FILE__).'/../../../vendor/PasswordHash.php' );
         $hasher = new PasswordHash(8, TRUE);
 
+        /* Check the password against the hash in Wordpress wp_users table */
         if (!$hasher->CheckPassword($password, $row['user_pass'])){
-        //if(password_verify($password, $row['user_pass'])){
             /* Invalid password. */
             throw new SimpleSAML_Error_Error('WRONGUSERPASS');
         }
