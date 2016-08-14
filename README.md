@@ -1,6 +1,6 @@
 # WordpressAuth
 
-Module to use SimpleSAMLphp with a MySQL user database.
+Module to use SimpleSAMLphp with a Wordpress user database on MySQL/MariaDB.
 
 (PHP 5 >= 5.3, PHP 7)
 
