@@ -1,7 +1,7 @@
 # WordpressAuth
 SimpleSAMLphp module to use Wordpress as a SAML 2.0 Identity Provider. (PHP 5 >= 5.3, PHP 7)
 
-WordpressAuth is SimpleSAMLphp authentication module, that allows to use the Wordpress user database as the authentication source. The code was written for MySQL/MariaDB, but should be easy to change for use with another RDBMS.
+WordpressAuth is SimpleSAMLphp authentication module, that allows to use the Wordpress user database as the authentication source. The code was written for MySQL/MariaDB.
 
 ## Setup
 
