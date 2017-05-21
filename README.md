@@ -22,7 +22,6 @@ Edit the configuration file for authentication sources `simplesaml/config/authso
 ```php
 
 'wpauthinstance' => array(
-    'sqlauth:SQL',
     'dsn' => 'mysql:host=localhost;port=3306;dbname=<mysql database name>',
     'username' => '<mysql username>',
     'password' => '<mysql password>',
