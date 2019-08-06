@@ -1,5 +1,5 @@
 <?php
-class sspmod_wordpressauth_Auth_Source_WordpressAuth extends sspmod_core_Auth_UserPassBase {
+class sspmod_wordpressauth_Auth_Source_WordpressAuth extends SimpleSAML\Module\core\Auth\UserPassBase {
 
     /* The database DSN */
     private $dsn;
