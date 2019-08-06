@@ -72,7 +72,6 @@ class sspmod_wordpressauth_Auth_Source_WordpressAuth extends sspmod_core_Auth_Us
             'name' => array($row['display_name']), 
             'displayName' => array($row['display_name']),
             'email' => array($row['user_email']),
-            'eduPersonAffiliation' => array('member', 'employee'),
         );
 
         /* Return the attributes. */
