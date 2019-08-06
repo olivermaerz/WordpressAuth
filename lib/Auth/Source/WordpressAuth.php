@@ -10,6 +10,7 @@ class sspmod_wordpressauth_Auth_Source_WordpressAuth extends sspmod_core_Auth_Us
 
     /* Table name for users tables (usually wp_users) */
     private $userstable;
+    private $usermetatable;
 
     public function __construct($info, $config) {
         parent::__construct($info, $config);
@@ -31,6 +32,10 @@ class sspmod_wordpressauth_Auth_Source_WordpressAuth extends sspmod_core_Auth_Us
             throw new Exception('Missing or invalid userstable option in config.');
         }
         $this->userstable = $config['userstable'];
+        if (!is_string($config['usermetatable'])) {
+            throw new Exception('Missing or invalid usermetatable option in config.');
+        }
+        $this->usermetatable = $config['usermetatable'];
     }
 
     protected function login($username, $password) {
@@ -42,7 +47,7 @@ class sspmod_wordpressauth_Auth_Source_WordpressAuth extends sspmod_core_Auth_Us
         $db->exec("SET NAMES 'utf8'");
 
         /* Prepare statement (PDO) */
-        $st = $db->prepare('SELECT user_login, user_pass, display_name, user_email FROM '.$this->userstable.' WHERE user_login = :username');
+        $st = $db->prepare('SELECT ID, user_login, user_pass, display_name, user_email FROM '.$this->userstable.' WHERE user_login = :username');
 
         if (!$st->execute(array('username' => $username))) {
             throw new Exception("Failed to query database for user.");
@@ -65,6 +70,19 @@ class sspmod_wordpressauth_Auth_Source_WordpressAuth extends sspmod_core_Auth_Us
             throw new SimpleSAML_Error_Error('WRONGUSERPASS');
         }
 
+        /* Load the roles */
+        $stmeta = $db->prepare('SELECT meta_value FROM '.$this->usermetatable.' WHERE meta_key="wp_capabilities" AND user_id = :user_id');
+
+        if (!$stmeta->execute(array('user_id' => $row['ID']))) {
+            throw new Exception("Failed to query database for user metadata wp_capabilities.");
+        }
+
+        $rowmeta = $stmeta->fetch(PDO::FETCH_ASSOC);
+        if (!$rowmeta) {
+            /* User Metadata not found, treat as User not found */
+            throw new SimpleSAML_Error_Error('WRONGUSERPASS');
+        }
+
         /* Create the attribute array of the user. */
         $attributes = array(
             'uid' => array($username),
@@ -72,6 +90,7 @@ class sspmod_wordpressauth_Auth_Source_WordpressAuth extends sspmod_core_Auth_Us
             'name' => array($row['display_name']), 
             'displayName' => array($row['display_name']),
             'email' => array($row['user_email']),
+            'isMemberOf' => array_keys(unserialize($rowmeta['meta_value'])),
         );
 
         /* Return the attributes. */
