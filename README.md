@@ -26,6 +26,7 @@ Edit the configuration file for authentication sources `simplesaml/config/authso
     'username' => '<mysql username>',
     'password' => '<mysql password>',
     'userstable' => 'wp_users',
+    'usermetatable' => 'wp_usermeta',
     'wordpressauth:WordpressAuth'
  ),
  
